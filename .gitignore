@@ -1,0 +1,19 @@
+# 操作系统临时文件
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+
+# 编辑器与 IDE 临时缓存
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+.idea/
+*.swp
+*~
+*.bak
+
+# 批处理临时检查文件
+*.tmp
+git_status_check.txt
