@@ -1,76 +1,77 @@
-@echo off
+ï»¿@echo off
+chcp 65001 >nul
 setlocal
 cd /d "%~dp0"
-title MyNotes Git Sync
+title MyNotes çŸ¥è¯†åº“ Git ä¸€é”®åŒæ­¥å·¥å…·
 
 echo ======================================================
-echo          MyNotes ÖªÊ¶¿â Git ×Ô¶¯»¯Í¬²½ÖúÊÖ
+echo          MyNotes çŸ¥è¯†åº“ Git è‡ªåŠ¨åŒ–åŒæ­¥åŠ©æ‰‹
 echo ======================================================
 echo.
 
-echo [1/4] ÕýÔÚÀ­È¡Ô¶³Ì¸üÐÂ (git pull)...
+echo [1/4] æ­£åœ¨æ‹‰å–è¿œç¨‹æ›´æ–° (git pull)...
 git pull origin main
 if errorlevel 1 goto PULL_ERROR
-echo [³É¹¦] Ô¶³Ì·ÖÖ§ÒÑÊÇ×îÐÂ×´Ì¬¡£
+echo [æˆåŠŸ] è¿œç¨‹åˆ†æ”¯å·²æ˜¯æœ€æ–°çŠ¶æ€ã€‚
 echo.
 
-echo [2/4] ¼ì²é±¾µØÊÇ·ñÓÐÐÞ¸Ä...
+echo [2/4] æ£€æŸ¥æœ¬åœ°æ˜¯å¦æœ‰ä¿®æ”¹...
 git status --porcelain > "%temp%\git_status_check.txt"
 set HAS_CHANGES=0
 for %%A in ("%temp%\git_status_check.txt") do if %%~zA GTR 0 set HAS_CHANGES=1
 del "%temp%\git_status_check.txt"
 
 if "%HAS_CHANGES%"=="0" (
-    echo [2/4] ±¾µØÃ»ÓÐÈÎºÎÐÞ¸Ä»òÐÂÔöÎÄ¼þ£¬ÎÞÐèÌá½»¡£
+    echo [2/4] æœ¬åœ°æ²¡æœ‰ä»»ä½•ä¿®æ”¹æˆ–æ–°å¢žæ–‡ä»¶ï¼Œæ— éœ€æäº¤ã€‚
     echo.
     echo ======================================================
-    echo [Íê³É] ÖªÊ¶¿âÒÑ±£³Ö×îÐÂÍ¬²½£¡
+    echo [å®Œæˆ] çŸ¥è¯†åº“å·²ä¿æŒæœ€æ–°åŒæ­¥ï¼
     echo ======================================================
     goto FINISH
 )
 
-echo [2/4] ¼ì²âµ½±¾µØÐÞ¸Ä£¬ÕýÔÚÔÝ´æËùÓÐÎÄ¼þ (git add)...
+echo [2/4] æ£€æµ‹åˆ°æœ¬åœ°ä¿®æ”¹ï¼Œæ­£åœ¨æš‚å­˜æ‰€æœ‰æ–‡ä»¶ (git add)...
 git add .
 
 for /f "tokens=*" %%i in ('powershell -NoProfile -Command "Get-Date -Format 'yyyy-MM-dd HH:mm:ss'"') do set TIMESTAMP=%%i
-echo [3/4] ÕýÔÚÌá½»±ä¸ü: Update: %TIMESTAMP% ...
+echo [3/4] æ­£åœ¨æäº¤å˜æ›´: Update: %TIMESTAMP% ...
 git commit -m "Update: %TIMESTAMP%"
 if errorlevel 1 goto COMMIT_ERROR
 
-echo [4/4] ÕýÔÚÍÆËÍµ½ GitHub (git push)...
+echo [4/4] æ­£åœ¨æŽ¨é€åˆ° GitHub (git push)...
 git push origin main
 if errorlevel 1 goto PUSH_ERROR
 
 echo.
 echo ======================================================
-echo [³É¹¦] ÖªÊ¶¿âÒÑÈ«²¿Í¬²½ÖÁ GitHub£¡
+echo [æˆåŠŸ] çŸ¥è¯†åº“å·²å…¨éƒ¨åŒæ­¥è‡³ GitHubï¼
 echo ======================================================
 goto FINISH
 
 :PULL_ERROR
 echo.
-echo [´íÎó] À­È¡Ô¶³Ì·ÖÖ§Ê§°Ü£¡Çë¼ì²éÍøÂçÁ¬½Ó»òÊÖ¶¯½â¾ö³åÍ»¡£
+echo [é”™è¯¯] æ‹‰å–è¿œç¨‹åˆ†æ”¯å¤±è´¥ï¼è¯·æ£€æŸ¥ç½‘ç»œè¿žæŽ¥æˆ–æ‰‹åŠ¨è§£å†³å†²çªã€‚
 goto ERROR_PAUSE
 
 :COMMIT_ERROR
 echo.
-echo [´íÎó] ±¾µØÌá½»Ê§°Ü£¡
+echo [é”™è¯¯] æœ¬åœ°æäº¤å¤±è´¥ï¼
 goto ERROR_PAUSE
 
 :PUSH_ERROR
 echo.
-echo [´íÎó] ÍÆËÍµ½ GitHub Ê§°Ü£¡Çë¼ì²éÍøÂç´úÀí»ò GitHub ÊÚÈ¨¡£
+echo [é”™è¯¯] æŽ¨é€åˆ° GitHub å¤±è´¥ï¼è¯·æ£€æŸ¥ç½‘ç»œä»£ç†æˆ– GitHub æŽˆæƒã€‚
 goto ERROR_PAUSE
 
 :ERROR_PAUSE
 echo ======================================================
-echo Í¬²½¹ý³ÌÖÐ³öÏÖÒì³££¬´°¿ÚÔÝÍ££¬Çë²é¿´ÉÏ·½´íÎóÐÅÏ¢¡£
+echo åŒæ­¥è¿‡ç¨‹ä¸­å‡ºçŽ°å¼‚å¸¸ï¼Œçª—å£æš‚åœï¼Œè¯·æŸ¥çœ‹ä¸Šæ–¹é”™è¯¯ä¿¡æ¯ã€‚
 echo ======================================================
 pause
 exit /b 1
 
 :FINISH
 echo.
-echo Í¬²½Íê³É¡£
+echo åŒæ­¥å®Œæˆã€‚
 timeout /t 3 >nul 2>&1
 exit /b 0
