@@ -9,42 +9,55 @@ echo          MyNotes 知识库 Git 自动化同步助手
 echo ======================================================
 echo.
 
+:: 1. 先拉取远程最新内容（保证多设备同步时的线性历史）
 echo [1/4] 正在拉取远程更新 (git pull)...
 git pull origin main
 if errorlevel 1 goto PULL_ERROR
 echo [成功] 远程分支已是最新状态。
 echo.
 
-echo [2/4] 检查本地是否有修改...
+:: 2. 检查工作区是否有未提交的修改
+echo [2/4] 检查工作区与暂存区...
 git status --porcelain > "%temp%\git_status_check.txt"
 set HAS_CHANGES=0
 for %%A in ("%temp%\git_status_check.txt") do if %%~zA GTR 0 set HAS_CHANGES=1
 del "%temp%\git_status_check.txt"
 
-if "%HAS_CHANGES%"=="0" (
-    echo [2/4] 本地没有任何修改或新增文件，无需提交。
-    echo.
-    echo ======================================================
-    echo [完成] 知识库已保持最新同步！
-    echo ======================================================
-    goto FINISH
-)
+if "%HAS_CHANGES%"=="0" goto CHECK_UNPUSHED
 
 echo [2/4] 检测到本地修改，正在暂存所有文件 (git add)...
 git add .
 
 for /f "tokens=*" %%i in ('powershell -NoProfile -Command "Get-Date -Format 'yyyy-MM-dd HH:mm:ss'"') do set TIMESTAMP=%%i
-echo [3/4] 正在提交变更: Update: %TIMESTAMP% ...
+echo [3/4] 正在提交变更: Update: %TIMESTAMP%
 git commit -m "Update: %TIMESTAMP%"
 if errorlevel 1 goto COMMIT_ERROR
+goto CHECK_UNPUSHED_COUNT
 
-echo [4/4] 正在推送到 GitHub (git push)...
+:CHECK_UNPUSHED
+echo [2/4] 本地工作区无未暂存修改。
+
+:CHECK_UNPUSHED_COUNT
+set UNPUSHED=0
+for /f %%C in ('git rev-list --count origin/main..HEAD 2^>nul') do set UNPUSHED=%%C
+
+if "%UNPUSHED%"=="0" goto ALREADY_SYNCED
+
+echo [4/4] 检测到 %UNPUSHED% 个待推送提交，正在推送到 GitHub (git push)...
 git push origin main
 if errorlevel 1 goto PUSH_ERROR
 
 echo.
 echo ======================================================
 echo [成功] 知识库已全部同步至 GitHub！
+echo ======================================================
+goto FINISH
+
+:ALREADY_SYNCED
+echo [4/4] 本地与远程完全同步，无需推送。
+echo.
+echo ======================================================
+echo [完成] 知识库已保持最新同步！
 echo ======================================================
 goto FINISH
 
@@ -60,7 +73,7 @@ goto ERROR_PAUSE
 
 :PUSH_ERROR
 echo.
-echo [错误] 推送到 GitHub 失败！请检查网络代理或 GitHub 授权。
+echo [错误] 推送到 GitHub 失败！请检查网络代理或 SSH / 权限配置。
 goto ERROR_PAUSE
 
 :ERROR_PAUSE
